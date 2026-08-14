@@ -109,6 +109,21 @@ assemble_app <- function(root = repo_root(), version = Sys.getenv("LEAFTOOL_VERS
               file.path(appdir, "icons"), overwrite = TRUE)
   }
 
+  # copy third-party notices + license texts so they ship inside the app
+  lic_dir <- file.path(appdir, "licenses")
+  dir.create(lic_dir, showWarnings = FALSE)
+  if (file.exists(file.path(root, "THIRD-PARTY-NOTICES.md"))) {
+    file.copy(file.path(root, "THIRD-PARTY-NOTICES.md"),
+              file.path(appdir, "THIRD-PARTY-NOTICES.md"), overwrite = TRUE)
+  }
+  if (file.exists(file.path(root, "LICENSE"))) {
+    file.copy(file.path(root, "LICENSE"), file.path(lic_dir, "LICENSE"), overwrite = TRUE)
+  }
+  src_lic <- file.path(root, "packaging", "licenses")
+  if (dir.exists(src_lic)) {
+    file.copy(list.files(src_lic, full.names = TRUE), lic_dir, overwrite = TRUE)
+  }
+
   if (verbose) message("Assembled OK: ", appdir)
   invisible(appdir)
 }

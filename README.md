@@ -147,7 +147,8 @@ runLeAFtool()
 
 ---
 
-## 许可证
+## 许可证与合规
 
-沿用原始项目的许可证：**LGPL-3**（GNU Lesser General Public License v3），详见 [LICENSE](./LICENSE)。
-原始代码版权 © 2019 CIRAD-INRA。本仓库新增的打包工程文件在相同许可证下发布。
+- **LeAFtool 原始代码**：DESCRIPTION 声明 **LGPL-3**（仓库内 LICENSE 文件为 GPL-3 全文，原始仓库自身存在此不一致，本仓库如实保留；源码头部另提及 CeCILL-C）。版权 © 2019 CIRAD-INRA。
+- **合规要点**：完整源代码随本仓库公开发布，且随桌面应用以 **R 源文件形式**分发；应用内所有第三方组件及其许可证文本随应用打包（详见 [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)，含 shinyelectron AGPL-3、R GPL-2/3、EBImage LGPL、Electron MIT 等）；应用内 R 包库为可读写的普通文件，用户可自行替换修改以满足 LGPL 重新链接要求。
+- **注意**：如需商业分发，建议联系原始作者确认最终许可状态。
