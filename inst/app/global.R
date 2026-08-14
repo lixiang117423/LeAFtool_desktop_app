@@ -205,8 +205,10 @@ getOwnVolume <- function (exclude=NULL){
   volumes
 }
 
-# list of volumes acces to load data
-allVolumesAvail <- getOwnVolume()
+# list of volumes acces to load data (never crash the app if enumeration fails)
+allVolumesAvail <- tryCatch(getOwnVolume(),
+                            error = function(e) c(home = "~"),
+                            warning = function(w) c(home = "~"))
 
 # return odd number >
 returnOdd <- function(value){
