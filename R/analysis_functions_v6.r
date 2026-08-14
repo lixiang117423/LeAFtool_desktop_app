@@ -531,8 +531,16 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
-    if ( is.null(fileImage)) fileImage = "NULL"
-    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = ",fileImage,
+    # Build a text representation of fileImage for the config file WITHOUT
+    # modifying fileImage itself (it is used below to run the analysis).
+    fileImageTXT <- if (is.null(fileImage)) {
+      "NULL"
+    } else if (length(fileImage) == 1) {
+      paste0("'", fileImage, "'")
+    } else {
+      paste0("c(", paste0("'", fileImage, "'", collapse = ", "), ")")
+    }
+    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = ", fileImageTXT,
                 ", leafAreaMin = ",leafAreaMin,
                 ", leafBorder = ",leafBorder,
                 ", lesionBorder = ",lesionBorder,
