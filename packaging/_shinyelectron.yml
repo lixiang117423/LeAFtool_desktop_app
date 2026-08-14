@@ -17,9 +17,11 @@ window:
   width: 1280
   height: 860
 
+# Icon paths are resolved relative to the R process working directory,
+# which in CI (and build-desktop.R) is the repository root.
 icons:
-  mac: "icons/icon.icns"
-  win: "icons/icon.ico"
+  mac: "app/icons/icon.icns"
+  win: "app/icons/icon.ico"
 
 server:
   port: 7991

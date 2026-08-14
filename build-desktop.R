@@ -35,6 +35,7 @@ root <- dirname(sub(
   "^--file=", "", grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)[1]
 ))
 root <- normalizePath(root, mustWork = FALSE)
+setwd(root)  # icon/config paths are resolved relative to the repo root
 
 # 1. assemble the self-contained Shiny app (app/)
 source(file.path(root, "scripts", "assemble-app.R"))
