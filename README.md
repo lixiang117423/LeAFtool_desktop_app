@@ -2,6 +2,8 @@
 
 # LeAFtool — Lesion Area Finding tool（桌面版打包仓库）
 
+[English](./README_EN.md) | 中文版
+
 [![Build LeAFtool desktop installers](https://github.com/lixiang117423/LeAFtool_desktop_app/actions/workflows/build-desktop.yml/badge.svg)](https://github.com/lixiang117423/LeAFtool_desktop_app/actions/workflows/build-desktop.yml)
 
 LeAFtool 是一个用于**植物叶片病斑图像分析**的工具：基于监督式像素分类（LDA / QDA / SVM），
@@ -27,8 +29,8 @@ LeAFtool 是一个用于**植物叶片病斑图像分析**的工具：基于监�
 
 | 平台 | 安装包 | 说明 |
 |---|---|---|
-| macOS（Apple Silicon, M 系列芯片） | `LeAFtool-1.0.0-arm64.dmg` | 打开 dmg，把 LeAFtool.app 拖入"应用程序" |
-| Windows（x64） | `LeAFtool-Setup-1.0.0.exe` | 双击安装，安装完成后从开始菜单启动 |
+| macOS（Apple Silicon, M 系列芯片） | `leaftool-<版本>-arm64.dmg` | 打开 dmg，把 LeAFtool.app 拖入"应用程序" |
+| Windows（x64） | `leaftool.Setup.<版本>.exe` | 双击安装，安装完成后从开始菜单启动 |
 
 **下载地址**：首选 [Releases 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/releases)——
 每次推送版本 tag（如 `v1.0.0`）构建成功后会自动发布 Release 并挂上对应版本的安装包；
