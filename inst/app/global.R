@@ -169,18 +169,32 @@ getOwnVolume <- function (exclude=NULL){
     volumes <- c(home, media, volumes)
   }
   else if (osSystem == "Windows") {
-    volumes <- system("wmic logicaldisk get Caption", intern = T)
-    volumes <- sub(" *\\r$", "", volumes)
-    keep <- !tolower(volumes) %in% c("caption", "")
-    volumes <- volumes[keep]
-    volNames <- system("wmic logicaldisk get VolumeName",
-                       intern = T)
-    volNames <- sub(" *\\r$", "", volNames)
-    volNames <- volNames[keep]
-    volNames <- paste0(volNames, ifelse(volNames == "",
-                                        "", " "))
-    volNames <- paste0(volNames, "(", volumes, ")")
-    names(volumes) <- volNames
+    # wmic was removed in recent Windows 11 builds; PowerShell is always
+    # available there, so try it first and fall back to wmic on older systems.
+    volumes <- tryCatch({
+      ps_out <- system2("powershell",
+                        c("-NoProfile", "-NonInteractive", "-Command",
+                          "Get-CimInstance Win32_LogicalDisk | Select-Object -ExpandProperty DeviceID"),
+                        stdout = TRUE, stderr = FALSE)
+      ps_out <- trimws(ps_out)
+      ps_out <- ps_out[nzchar(ps_out)]
+      ps_out
+    }, error = function(e) NULL, warning = function(w) NULL)
+
+    if (length(volumes) == 0) {
+      volumes <- tryCatch({
+        w <- system("wmic logicaldisk get Caption", intern = T)
+        w <- sub("[[:space:]]+$", "", w)
+        keep <- !tolower(w) %in% c("caption", "")
+        w <- w[keep]
+        w[nzchar(trimws(w))]
+      }, error = function(e) NULL, warning = function(w) NULL)
+    }
+    if (length(volumes) == 0) {
+      volumes <- "C:"  # last-resort fallback
+    }
+    names(volumes) <- paste0(volumes, " (", sub(":$", "", volumes), ")")
+    volumes <- c(home = "~", volumes)
   }
   else {
     stop("unsupported OS")
