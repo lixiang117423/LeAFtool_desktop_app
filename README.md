@@ -30,9 +30,9 @@ LeAFtool 是一个用于**植物叶片病斑图像分析**的工具：基于监�
 | macOS（Apple Silicon, M 系列芯片） | `LeAFtool-1.0.0-arm64.dmg` | 打开 dmg，把 LeAFtool.app 拖入"应用程序" |
 | Windows（x64） | `LeAFtool-Setup-1.0.0.exe` | 双击安装，安装完成后从开始菜单启动 |
 
-**下载地址**：本仓库的 [Actions 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/actions)
-（最新一次成功的构建 → 底部 Artifacts 下载）；
-推送 tag（如 `v1.0.0`）后安装包也会自动挂到 [Releases 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/releases)。
+**下载地址**：首选 [Releases 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/releases)——
+每次推送版本 tag（如 `v1.0.0`）构建成功后会自动发布 Release 并挂上对应版本的安装包；
+也可以在 [Actions 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/actions)（最新一次成功的构建 → Artifacts）下载。
 
 桌面版内置了完整的 R 运行时和全部依赖（含 EBImage），
 **用户机器上不需要安装 R，首次启动也无需联网**。

@@ -32,7 +32,7 @@ repo_root <- function() {
   normalizePath(getwd(), mustWork = FALSE)
 }
 
-assemble_app <- function(root = repo_root(), verbose = TRUE) {
+assemble_app <- function(root = repo_root(), version = Sys.getenv("LEAFTOOL_VERSION", unset = ""), verbose = TRUE) {
   appdir <- file.path(root, "app")
   src_app <- file.path(root, "inst", "app")
   src_r <- file.path(root, "R")
@@ -85,7 +85,21 @@ assemble_app <- function(root = repo_root(), verbose = TRUE) {
   }
 
   # copy the shinyelectron configuration
-  file.copy(cfg, file.path(appdir, "_shinyelectron.yml"), overwrite = TRUE)
+  cfg_out <- file.path(appdir, "_shinyelectron.yml")
+  file.copy(cfg, cfg_out, overwrite = TRUE)
+
+  # inject the build version (from LEAFTOOL_VERSION env var, e.g. tag-derived)
+  if (nzchar(version) && grepl("^[0-9]+\\.[0-9]+\\.[0-9]+", version)) {
+    cl <- readLines(cfg_out, warn = FALSE)
+    i_app <- grep("^app:", cl)[1]
+    i_ver <- grep("^  version:", cl)
+    i_ver <- i_ver[i_ver > i_app][1]
+    if (!is.na(i_ver)) {
+      cl[i_ver] <- paste0('  version: "', version, '"')
+      writeLines(cl, cfg_out)
+      if (verbose) message("Set app version to: ", version)
+    }
+  }
 
   # copy app icons (referenced by icons.mac / icons.win in the config)
   src_icons <- file.path(root, "packaging", "icons")

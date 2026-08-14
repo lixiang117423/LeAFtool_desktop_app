@@ -38,7 +38,7 @@ root <- normalizePath(root, mustWork = FALSE)
 
 # 1. assemble the self-contained Shiny app (app/)
 source(file.path(root, "scripts", "assemble-app.R"))
-assemble_app(root = root, verbose = TRUE)
+assemble_app(root = root, version = Sys.getenv("LEAFTOOL_VERSION", unset = ""), verbose = TRUE)
 
 # 2. build with shinyelectron (bundled portable R + packages + Electron)
 library(shinyelectron)

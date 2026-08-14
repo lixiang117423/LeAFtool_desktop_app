@@ -1,12 +1,13 @@
 # Build LeAFtool desktop installers: macOS .dmg (arm64) + Windows .exe (x64)
 #
 # Trigger:
-#   - push to main
-#   - push a tag like v1.0.0  -> also attaches the installers to a GitHub Release
-#   - manual run (Actions tab -> Run workflow)
+#   - push to main                     -> builds with the default version (1.0.0)
+#   - push a tag like v1.0.0           -> builds with that version AND publishes a
+#                                         GitHub Release with the installers attached
+#   - manual run (Actions tab)         -> optional version input
 #
-# Download the installers from the Actions run page ("Artifacts") or from the
-# Release page created by a tag push.
+# Artifacts are always available on the run page; tag pushes additionally
+# create/update the Release page.
 
 name: Build LeAFtool desktop installers
 
@@ -15,6 +16,11 @@ on:
     branches: [main]
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "App version for this build (e.g. 1.0.1)"
+        required: false
+        default: "1.0.0"
 
 jobs:
   build:
@@ -34,6 +40,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Version resolution: tag (v1.2.3 -> 1.2.3) > manual input > default 1.0.0
+      - name: Resolve app version
+        id: version
+        shell: bash
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ "${{ github.ref_type }}" == "tag" && "${{ github.ref_name }}" == v* ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if [[ -z "$VERSION" || "$VERSION" == "null" ]]; then
+            VERSION="1.0.0"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved app version: $VERSION"
+
       # R is needed here only to run the assemble script; the actual bundled
       # runtime is downloaded separately by shinyelectron (portable R 4.5.3).
       - name: Setup R
@@ -44,6 +65,8 @@ jobs:
 
       - name: Assemble self-contained Shiny app
         shell: bash
+        env:
+          LEAFTOOL_VERSION: ${{ steps.version.outputs.version }}
         run: Rscript -e 'source("scripts/assemble-app.R"); assemble_app(verbose = TRUE)'
 
       - name: Build Electron installer
@@ -59,20 +82,40 @@ jobs:
           r-version: "4.5.3"
           sign: "false"
           upload-artifact: "true"
-          artifact-name: LeAFtool-${{ matrix.platform }}-${{ matrix.arch }}
+          artifact-name: LeAFtool-${{ steps.version.outputs.version }}-${{ matrix.platform }}-${{ matrix.arch }}
 
   release:
+    # Publish a GitHub Release when a version tag (v*) is pushed.
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Download artifacts
+      - name: Download installers
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Attach installers to GitHub Release
+          merge-multiple: true
+
+      - name: List release files
+        shell: bash
+        run: ls -la artifacts/
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          tag_name: ${{ github.ref_name }}
+          name: "LeAFtool ${{ github.ref_name }}"
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            artifacts/*.dmg
+            artifacts/*.exe
+          body: |
+            ## LeAFtool 桌面版 ${{ github.ref_name }}
+
+            - macOS（Apple Silicon）：`LeAFtool-${{ github.ref_name }}-arm64.dmg`（打开 dmg 后把 LeAFtool.app 拖入"应用程序"；首次打开请右键 → 打开）
+            - Windows（x64）：`LeAFtool-Setup-${{ github.ref_name }}.exe`（SmartScreen 提示时选择"更多信息 → 仍要运行"）
+
+            桌面版内置 R 运行时与全部依赖，**无需安装 R，离线可用**。使用说明见 [README](https://github.com/lixiang117423/LeAFtool_desktop_app/blob/main/README.md)。

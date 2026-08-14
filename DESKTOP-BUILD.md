@@ -67,12 +67,18 @@ Windows 的 bundled 构建必须在 Windows 上执行。仓库里已配好工作
    ```bash
    git add . && git commit -m "desktop packaging" && git push -u origin main
    ```
-2. GitHub 上打开 Actions 页 → Build LeAFtool desktop installers → Run workflow；
-   或者直接推送一个 tag（`git tag v1.0.0 && git push origin main --tags`）自动触发并把
-   安装包挂到 Release 页。
-3. 产物：
-   - `LeAFtool-mac-arm64` → `LeAFtool-1.0.0-arm64.dmg`
-   - `LeAFtool-win-x64` → `LeAFtool-Setup-1.0.0.exe`
+2. **发布新版本**：推送一个版本 tag，构建成功后会自动创建 GitHub Release 并把安装包挂上去：
+   ```bash
+   git tag v1.0.0 && git push origin main --tags
+   ```
+   - tag 的版本号（如 `1.0.0`）会写入应用版本和安装包文件名；
+   - Release 自动生成 release notes（`generate_release_notes`），并标记为 latest；
+   - 之后每推一个新 tag（`v1.0.1`…）都会发布一个新版本。
+3. **手动构建**：Actions 页 → Run workflow，可填 version 输入框指定版本号。
+4. 产物：
+   - Artifacts：`LeAFtool-<版本>-mac-arm64` → `LeAFtool-<版本>-arm64.dmg`；
+     `LeAFtool-<版本>-win-x64` → `LeAFtool-Setup-<版本>.exe`
+   - 推 tag 时这些安装包同时挂到 Release 页。
 
 ## 四、给最终用户的分发说明
 
