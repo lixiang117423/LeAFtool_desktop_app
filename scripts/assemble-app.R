@@ -87,6 +87,14 @@ assemble_app <- function(root = repo_root(), verbose = TRUE) {
   # copy the shinyelectron configuration
   file.copy(cfg, file.path(appdir, "_shinyelectron.yml"), overwrite = TRUE)
 
+  # copy app icons (referenced by icons.mac / icons.win in the config)
+  src_icons <- file.path(root, "packaging", "icons")
+  if (dir.exists(src_icons)) {
+    dir.create(file.path(appdir, "icons"), showWarnings = FALSE)
+    file.copy(list.files(src_icons, full.names = TRUE),
+              file.path(appdir, "icons"), overwrite = TRUE)
+  }
+
   if (verbose) message("Assembled OK: ", appdir)
   invisible(appdir)
 }

@@ -17,6 +17,10 @@ window:
   width: 1280
   height: 860
 
+icons:
+  mac: "icons/icon.icns"
+  win: "icons/icon.ico"
+
 server:
   port: 7991
 
