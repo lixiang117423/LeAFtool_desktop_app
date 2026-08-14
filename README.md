@@ -1,234 +1,153 @@
 ![LeAFtool Logo](./inst/app/www/LeAFtool-long.png)
 
-## Table of Contents
-<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
-- [About this package](#about-this-package)
-- [Installation](#installation)
-- [Running LeAFtool with GUI](#running-leaftool-with-gui)
-- [Running LeAFtool without GUI (call direct function)](#running-leaftool-without-gui-call-direct-function)
-  - [Training](#training)
-  - [Analysis](#analysis)
-- [Toolbox](#toolbox)
-  - [Resize function](#resize-function)
-  - [Split function](#split-function)
-- [Troubleshooting](#troubleshooting)
-- [Citation](#citation)
-- [License](#license)
-- [Other](#other)
+# LeAFtool — Lesion Area Finding tool（桌面版打包仓库）
 
-<!-- /TOC -->
+[![Build LeAFtool desktop installers](https://github.com/lixiang117423/LeAFtool_desktop_app/actions/workflows/build-desktop.yml/badge.svg)](https://github.com/lixiang117423/LeAFtool_desktop_app/actions/workflows/build-desktop.yml)
 
+LeAFtool 是一个用于**植物叶片病斑图像分析**的工具：基于监督式像素分类（LDA / QDA / SVM），
+从扫描图像中自动分割叶片与病斑，并输出病斑数量、面积、形状等量化指标。
 
-## About this package
+本仓库在**原始 LeAFtool R 包**的基础上，增加了**桌面应用打包**能力，
+使没有 R 基础的用户也能通过双击安装包直接使用。
 
-| :warning: WARNING          |
-|:---------------------------|
-| This package is no longer maintained. Maintaining R updates is too complicated and libraries do not backward compatibility.      |
+---
 
+## 目录
 
-Research on plant leaf diseases requires the acquisition of quantitative data to characterize the symptoms caused by different pathogens. These symptoms are frequently lesions that are differentiated from the leaf blade by their color and texture. Among the variables used to characterize the impact of a disease, the most relevant are the number of lesions per unit of leaf area, the area and the shape of the lesions. Since visual measurements are only possible on small numbers of images, it is necessary to use computerized image analysis procedures.
+- [桌面版：免安装 R 直接使用](#桌面版免安装-r-直接使用)
+- [本仓库与原始项目的关系](#本仓库与原始项目的关系)
+- [原始 R 包功能（供 R 用户参考）](#原始-r-包功能供-r-用户参考)
+- [桌面版构建指南（开发者）](#桌面版构建指南开发者)
+- [致谢](#致谢)
+- [许可证](#许可证)
 
-Existing procedures can partially meet the needs but are not always adapted to the particularities of the images obtained in the laboratory. From a scanned image under laboratory conditions containing several leaves of plants showing symptoms of a known disease, the algorithm developed makes it possible to obtain for each sheet of the image the number and the characteristics of surface and shape. lesions.
+---
 
-The method used is based on a supervised classification of the pixels characterized by the intensities of the red, green, blue channels. The learning set, made from a reference image, contains samples of the three classes: background, limb and lesions, each class can be subdivided into subclasses to improve the accuracy of the detection. Several methods of supervised classification can be used (discriminant factorial analysis, neural networks, machine vector support ...). Noise filtering is done using basic morphological operations. The code is developed under the R software, the image processing operations using the EBImage package.
+## 桌面版：免安装 R 直接使用
 
-The LeAFtool (Lesion Area Finding tool) is the created R package. The tool can be used in command line mode, or GUI mode via the Shiny package.
-For the learning game and the analysis the same options are available whatever the mode used. The interface contains an editing part of the results. It allows the editing of lesions (suppression of false detection), or to filter the information according to the maximum surface, the shape (round, elongated), ...
+| 平台 | 安装包 | 说明 |
+|---|---|---|
+| macOS（Apple Silicon, M 系列芯片） | `LeAFtool-1.0.0-arm64.dmg` | 打开 dmg，把 LeAFtool.app 拖入"应用程序" |
+| Windows（x64） | `LeAFtool-Setup-1.0.0.exe` | 双击安装，安装完成后从开始菜单启动 |
 
-The tools are being developed and a first functional version is available. The first tests carried out on 7 patho-systems showed promising results and similar to manual (visual) expertise. We will also improve the portability between different OS and see how to implement it on a shiny server.
+**下载地址**：本仓库的 [Actions 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/actions)
+（最新一次成功的构建 → 底部 Artifacts 下载）；
+推送 tag（如 `v1.0.0`）后安装包也会自动挂到 [Releases 页面](https://github.com/lixiang117423/LeAFtool_desktop_app/releases)。
 
-## Installation
+桌面版内置了完整的 R 运行时和全部依赖（含 EBImage），
+**用户机器上不需要安装 R，首次启动也无需联网**。
 
-  * Main Program: Please copy and paste the following command to R console.
-  * Upgrading R and Rstudio to the latest version (R >= 3.5, Rstudio > 1.0.0) is strongly recommended.
+### 首次打开提示
 
-``` ruby
-#### Install or update LeAFtool
+- **macOS**：应用未签名，首次打开请**右键点击 LeAFtool.app → 打开 → 再点"打开"**；
+  或在终端执行 `xattr -dr com.apple.quarantine /Applications/LeAFtool.app`。
+- **Windows**：SmartScreen 提示"未知发布者"时，点**更多信息 → 仍要运行**。
+
+### 基本流程
+
+1. **Training（训练）**：准备一个训练目录，包含 `background` / `limb` / `lesion` 三个子目录，
+   放入对应类别的采样图像 → 选择方法（LDA/QDA/SVM）和颜色模型（RGB/HSV）→ Run。
+2. **Analysis（分析）**：选择训练目录、样本图像目录和输出目录，设置叶片/病斑大小阈值等参数 → Run。
+3. **Edit（编辑）**：对分析结果进行人工校正（删除误检病斑、按形状/面积过滤）。
+4. **Toolbox（工具箱）**：批量缩放、切分图像。
+
+---
+
+## 本仓库与原始项目的关系
+
+本仓库**源自** [sravel/LeAFtool_R](https://github.com/sravel/LeAFtool_R)（CIRAD 的 LeAFtool 原始 R 包），
+在此基础上新增/修改了以下内容：
+
+| 内容 | 说明 |
+|---|---|
+| 桌面打包工程 | 基于 [shinyelectron](https://r-pkg.thecoatlessprofessor.com/shinyelectron/)（Electron + 内置 portable R），一键产出 macOS .dmg 与 Windows .exe |
+| GitHub Actions 工作流 | 推送即自动构建 macOS (arm64) 与 Windows (x64) 安装包 |
+| Bug 修复 | `analyseImages()` 中 `fileImage` 参数被覆盖失效的问题；SVM 模式预测调用错误字段（`train$svm` → `train$svm11`）的问题 |
+| 应用图标 | 由原始 Logo 生成的 `icns` / `ico` |
+| 使用文档 | `DESKTOP-BUILD.md`（桌面版构建指南） |
+
+原始算法、Shiny 界面与全部核心代码版权归原作者所有，详见下文致谢与许可证。
+
+---
+
+## 原始 R 包功能（供 R 用户参考）
+
+> 原始项目的完整说明见[原始 README](https://github.com/sravel/LeAFtool_R)。
+
+研究植物叶片病害需要获取定量数据来表征不同病原引起的症状。这些症状通常是病斑（lesion），
+可通过颜色与纹理与叶片区分。LeAFtool 从实验室扫描图像出发，对每个叶片给出病斑的
+数量、面积与形状特征。方法基于像素的监督分类（背景 / 叶片 / 病斑三类，可分子类），
+噪声过滤使用基本形态学操作，图像处理基于 [EBImage](https://bioconductor.org/packages/EBImage)（Bioconductor）。
+
+### 以 R 包方式安装（需要 R）
+
+```r
 install.packages("remotes")
-remotes::install_github("sravel/LeAFtool_R")
+remotes::install_github("sravel/LeAFtool_R")   # 原始仓库
 
-# if need
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
 BiocManager::install("EBImage")
 ```
 
-## Implemented methods
+### 主要函数
 
-For moments, LeAFtool support 3 methods:
-- LDA: Linear Discriminant Analysis
-- QDA: Quantitative Descriptive Analysis
-- SVM: Support Vector Machine
-
-## Running LeAFtool with GUI
-
-* To run the application LeAFtool
-```ruby
+```r
 library(LeAFtool)
+
+# 训练：输入目录须包含 background / limb / lesion 三个子目录
+training(pathTraining, method = "lda", transform = NULL, colormodel = "rgb")
+
+# 分析：对一批图像提取病斑特征
+analyseImages(pathTraining, pathResult, pathImages,
+              leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
+              lesionAreaMin = 10, lesionAreaMax = 120000,
+              lesionEccentricityMin = 0, lesionEccentricityMax = 1,
+              lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
+              blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1)
+
+# 工具箱
+resizeImageDirectory(path, factor = 2)
+splitImages(path, splitVertical = 2, splitHorizontal = 3)
+
+# 启动图形界面
 runLeAFtool()
 ```
 
-## Running LeAFtool without GUI (call direct function)
+---
 
-### Training
+## 桌面版构建指南（开发者）
 
-Compute and saves on disk the parameters of the training set
-Training input folder must include sub-folders:
-- limb
-- background
-- lesion
+详见 [DESKTOP-BUILD.md](./DESKTOP-BUILD.md)。核心要点：
 
-This sub-folder can contain either image files or sub-folders containing different groups of image files
+- 桌面版 = shinyelectron（Electron 壳）+ 内置 portable R 4.5.3 + Bioconductor 3.22 二进制包（EBImage）。
+- 本机构建 macOS 版（不动系统 R，使用 conda 环境）：
+  ```bash
+  mamba env create -f environment.yml
+  mamba run -n leaftool-desktop Rscript -e 'pak::pak("coatless-rpkg/shinyelectron")'
+  mamba run -n leaftool-desktop Rscript build-desktop.R
+  ```
+- Windows 版由 GitHub Actions 在 Windows runner 上自动构建（`.github/workflows/build-desktop.yml`）。
 
-The function return the confusion matrix and error rate.
+---
 
-```ruby
-library(LeAFtool)
-pathTraining <- '../Exemple1/learning/' ## FOR all OS (Linux Mac Windows)
-pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
-training(pathTraining,
-         method = "lda",
-         transform = NULL,
-         colormodel = "rgb"
-        )
-```
-* __pathTraining__  The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
-* __method__  Method of discrimainant analysis: "lda" (default), "qda" or "svm"
-* __transform__  transformation before analysis (e.g. sqrt) # not avail on GUI
-* __colormodel__   Model of color for the analysis: "rgb" (default) or "hsv"
+## 致谢
 
-```ruby
-#### Examples
-pathTraining <- '/media/sebastien/LaAFtool/exemples/exemple1/learning'
-confusionMatrix <- training(pathTraining)
-training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
-training(pathTraining, colormodel='hsv', method='lda')
-training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
-training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
-training(pathTraining, transform=log1p)
-```
+- **原始 LeAFtool 开发者**：Sébastien RAVEL、François BONNOT（CIRAD），Elisabeth FOURNIER（INRAE，原 INRA）。
+  原始代码托管于 <https://github.com/sravel/LeAFtool_R>，其知识产权归 CIRAD 与 South Green 开发平台所有。
+- **机构**：CIRAD、INRAE（原 INRA）及 [South Green](http://southgreen.fr/) 生物信息学平台。
+- **核心依赖**：[EBImage](https://bioconductor.org/packages/EBImage)（Bioconductor 图像处理包）、
+  [shiny](https://shiny.posit.co/) 及一系列 R 生态包。
+- **桌面打包工具链**：[shinyelectron](https://github.com/coatless-rpkg/shinyelectron)（作者 James J. Balamuta / coatless-rpkg）、
+  [portable-r](https://github.com/portable-r)（可移植 R 运行时）、Electron 与 electron-builder。
+- 原始项目曾于 [JOBIM 2019](https://jobim2019.sciencesconf.org/) 展示海报（见 `inst/app/www/posterLeaftool-JOBIM2019.png`）。
 
-### Analysis
+本仓库仅出于易用性目的为原始项目补充桌面打包能力；若 LeAFtool 的算法与功能对你有用，
+请优先引用/致谢原始项目及其作者。
 
-Analyse an image or a set of images.
-Analysis step can use many ram on parallel mode.
+---
 
-The function return a dataframe with file name, exit status and message if error.
+## 许可证
 
-```ruby
-library(LeAFtool)
-analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
-  leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
-  lesionAreaMin = 10, lesionAreaMax = 120000,
-  lesionEccentricityMin = 0, lesionEccentricityMax = 1,
-  lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
-  blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1)
-```
-
-* __pathTraining__  The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
-* __pathResult__  The path of the directory where to store the result files (created by the function if it does not exist).
-* __pathImages__  The path of the directory containing the images to analyse.
-* __fileImage__ A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
-* __leafAreaMin__ The minimum area of a leaf (in pixels) Default: 1000.
-* __leafBorder__  The diameter of the brush (in pixels) used to erode the leafBorder Default: 5.
-* __lesionBorder__  The diameter of the brush (in pixels) used to erode the lesionBorder Default: 3.
-* __lesionAreaMin__ The minimum area of a lesion (in pixels) Default: 10.
-* __lesionAreaMax__ The maximum area of a lesion (in pixels) Default: 120000.
-* __lesionEccentricityMin__ The minimum eccentricity of a lesion Default: 0.
-* __lesionEccentricityMax__ The maximum eccentricity of a lesion Default: 1.
-* __lesionColorBorder__ hexadecimal code for output fill color for lesion in the output image Default: #0000FF (blue).
-* __lesionColorBodies__ hexadecimal code for output bodies color for lesion in the output image Default: #FE8E0000 (transparent).
-* __blurDiameter__  The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default: 0'.
-* __outPosition__ join origale and color lesion image at right or buttom Default: right'.
-* __parallelThreadsNum__  number of thread use, 1 thread analysis 1 image if >= 2 Default: 1'.
-
-```ruby
-#### Examples
-dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
-             pathResult = "../exemple1/results",
-             pathImages = "../exemple1/samples",
-             parallelThreadsNum = 8
-             )
-
-analyseImages(pathTraining = "../exemple1/learning",
-              pathResult = "../exemple1/results",
-              pathImages = "../exemple1/samples",
-              leafAreaMin = 600,
-              leafBorder = 130,
-              parallelThreadsNum = 22)
-```
-<!--
-## User manual
-
-See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7tY1MfkDv8/edit?usp=sharing
--->
-## Toolbox
-
-### Resize function
-
-Resize all images into directory in order to reduce size.
-The function create new directory with factor resize.
-
-```ruby
-library(LeAFtool)
-pathImages <- '../exemple1/samples'
-resizeImageDirectory(path = pathImages, factor = 1.5)
-```
-
-* __path__ The path of the directory containing the sampled images to resize.
-* __factor__ The factor of reduce size Default: 2.
-
-### Split function
-
-The function split image on n horizontal / m vertical.
-For exemple if you want to split on 2 equal part
-The function create new directory with split images.
-
-```ruby
-library(LeAFtool)
-pathImages <- '../exemple1/samples'
-splitImages(pathImages, splitVertical = 2, splitHorizontal = 3,
-            marginTop = 10,
-            marginRight = 300,
-            marginBottom = 300,
-            marginLeft = 170,
-            numOrder = "bottum"
-            ) # split on 6 part (2x3)
-```
-
-* __path__ The path of the directory containing the sampled images to resize.
-* __splitVertical__ The number of part split vertical Default: 1.
-* __splitHorizontal__ The number of part split horizontal Default: 1.
-* __numOrder__ The order to numerote output image left from right or top to buttom. Default: bottum.
-* __marginTop__ The crop margin top. Default: 0
-* __marginRight__ The crop margin right. Default: 0
-* __marginBottom__ The crop margin bottom. Default: 0
-* __marginLeft__ The crop margin left. Default: 0
-
-## Troubleshooting
-
-#### install on linux
-
-if install *devtools* fail please check you have the library:
-```ruby
-sudo apt install libxml2-dev libcurl4-openssl-dev libssl-dev -y
-```
-
-if install *LeAFtool* fail please check you have the library:
-```ruby
-sudo apt install libtiff5-dev libfftw3-dev -y
-```
-
-## Citation
-The paper is currently in prep.
-
-## License
-
-LGPL-3 | file LICENSE
-
-## Other
-
-#### Poster
-
-![LeAFtool poster](./inst/app/www/posterLeaftool-JOBIM2019.png)
+沿用原始项目的许可证：**LGPL-3**（GNU Lesser General Public License v3），详见 [LICENSE](./LICENSE)。
+原始代码版权 © 2019 CIRAD-INRA。本仓库新增的打包工程文件在相同许可证下发布。

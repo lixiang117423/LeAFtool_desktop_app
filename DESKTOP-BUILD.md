@@ -63,12 +63,12 @@ mamba run -n leaftool-desktop Rscript build-desktop.R
 Windows 的 bundled 构建必须在 Windows 上执行。仓库里已配好工作流
 `.github/workflows/build-desktop.yml`：
 
-1. 把仓库推送到 GitHub：
+1. 把仓库推送到 GitHub（main 分支）：
    ```bash
-   git add . && git commit -m "desktop packaging" && git push
+   git add . && git commit -m "desktop packaging" && git push -u origin main
    ```
 2. GitHub 上打开 Actions 页 → Build LeAFtool desktop installers → Run workflow；
-   或者直接推送一个 tag（`git tag v1.0.0 && git push --tags`）自动触发并把
+   或者直接推送一个 tag（`git tag v1.0.0 && git push origin main --tags`）自动触发并把
    安装包挂到 Release 页。
 3. 产物：
    - `LeAFtool-mac-arm64` → `LeAFtool-1.0.0-arm64.dmg`

@@ -1,7 +1,7 @@
 # Build LeAFtool desktop installers: macOS .dmg (arm64) + Windows .exe (x64)
 #
 # Trigger:
-#   - push to master/main
+#   - push to main
 #   - push a tag like v1.0.0  -> also attaches the installers to a GitHub Release
 #   - manual run (Actions tab -> Run workflow)
 #
@@ -12,7 +12,7 @@ name: Build LeAFtool desktop installers
 
 on:
   push:
-    branches: [master, main]
+    branches: [main]
     tags: ["v*"]
   workflow_dispatch:
 
