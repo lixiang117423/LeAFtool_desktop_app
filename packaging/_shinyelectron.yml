@@ -1,0 +1,52 @@
+# shinyelectron configuration for the LeAFtool desktop builds.
+# Docs: https://r-pkg.thecoatlessprofessor.com/shinyelectron/
+#
+# NOTE: the R runtime is pinned to 4.5.3 on purpose. Bioconductor 3.22 is the
+# last release that ships prebuilt EBImage binaries for BOTH macOS arm64 and
+# Windows for R 4.5.x, and shinyelectron bundles binary packages only.
+
+app:
+  name: "LeAFtool"
+  version: "1.0.0"
+
+build:
+  type: "r-shiny"
+  runtime_strategy: "bundled"
+
+window:
+  width: 1280
+  height: 860
+
+server:
+  port: 7991
+
+dependencies:
+  auto_detect: true
+  r:
+    version: "4.5.3"
+    packages:
+      - EBImage
+      - shiny
+      - shinydashboard
+      - shinyFiles
+      - DT
+      - shinyjs
+      - shinyFeedback
+      - shinyhelper
+      - colourpicker
+      - shinyjqui
+      - lattice
+      - MASS
+      - ggplot2
+      - ParallelLogger
+      - e1071
+      - httpuv
+      - snow
+    repos:
+      - "https://cloud.r-project.org"
+      - "https://bioconductor.org/packages/3.22/bioc"
+
+# Unsigned builds: macOS users must right-click -> Open on first launch,
+# Windows shows a SmartScreen warning. See DESKTOP-BUILD.md.
+signing:
+  sign: false

@@ -1,0 +1,29 @@
+# Conda environment for building the LeAFtool desktop app locally.
+# Everything runs inside this env; your system R is not touched.
+#
+# Create:
+#   mamba env create -f environment.yml
+#
+# Then install shinyelectron (not on conda-forge) inside the env:
+#   mamba run -n leaftool-desktop Rscript -e 'pak::pak("coatless-rpkg/shinyelectron")'
+#
+# Note: EBImage is NOT part of this env. It is installed into the bundled
+# portable R by shinyelectron during the build (from Bioconductor 3.22).
+
+name: leaftool-desktop
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - r-base>=4.4,<4.7
+  - r-pak
+  - nodejs>=22
+  # shinyelectron R dependencies (pre-seeded so few things need compiling)
+  - r-cli
+  - r-fs
+  - r-jsonlite
+  - r-yaml
+  - r-whisker
+  - r-processx
+  - r-digest
+  - r-rlang

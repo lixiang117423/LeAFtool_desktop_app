@@ -238,7 +238,14 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
     }
   }
   # test input fileImage path is readable = mode 4 and writeable mode 3
-  checkDirRead(fileImage,"fileImage",test=c("e","r"))
+  # test input fileImage: must exist in pathImages
+  if (!is.null(fileImage)){
+    fileImageMissing <- fileImage[!file.exists(file.path(pathImages, fileImage))]
+    if (length(fileImageMissing) > 0){
+      errorMessage <- paste0("For parameter 'fileImage', can't find file(s) in pathImages: '", paste(fileImageMissing, collapse = "', '"), "'")
+      stop(errorMessage, call. = FALSE)
+    }
+  }
 
   # check all numeric values
   checkValue(leafAreaMin,"leafAreaMin")
@@ -308,7 +315,7 @@ predict2 <- function(image,train) { ## returns predicted values according to tra
     if (train$method=="lda" || train$method=="qda")
         return(stats::predict(train$lda1,df)$class)
     else if (train$method=="svm")
-        return(predict(train$svm,df))
+        return(predict(train$svm11,df))
 }
 
 ##############################################
@@ -544,7 +551,6 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
                 "', parallelThreadsNum = ",parallelThreadsNum,")")
   cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
-  fileImage = NULL
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory

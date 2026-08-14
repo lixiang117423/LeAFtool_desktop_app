@@ -3,3 +3,10 @@
 .RData
 .Ruserdata
 inst/doc
+
+# Desktop packaging
+app/
+build/
+dist/
+*.dmg
+*.exe
